@@ -44,25 +44,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private $id;
+    private ?int $id;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     #[Groups(["user:read", "user:write"])]
     #[Assert\NotBlank]
     #[Assert\Email]
-    private $email;
+    private ?string $email;
 
     #[ORM\Column(type: 'json')]
-    private $roles = [];
+    private array $roles = [];
 
     #[ORM\Column(type: 'string')]
     #[Groups(["user:write"])]
-    private $password;
+    private string $password;
 
     #[ORM\Column(type: 'string', length: 255, unique: true)]
     #[Groups(["user:read", "user:write", "cheese_listing:item:get", "cheese_listing:write"])]
     #[Assert\NotBlank]
-    private $username;
+    private string $username;
 
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: CheeseListing::class, cascade: ['persist'], orphanRemoval: true)]
     #[Groups(["user:read", "user:write" ])]

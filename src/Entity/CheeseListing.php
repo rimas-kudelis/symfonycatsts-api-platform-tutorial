@@ -120,13 +120,13 @@ class CheeseListing
         return $this->title;
     }
 
-//    public function setTitle(string $title): self
-//    {
-//        $this->title = $title;
-//
-//        return $this;
-//    }
-//
+    public function setTitle(string $title): self
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
     public function getDescription(): ?string
     {
         return $this->description;
