@@ -41,7 +41,7 @@ class CheeseListingResourceTest extends ApiTestCase
 
         $this->logIn($client, 'user2@example.com', 'foo');
         $client->request('PUT', '/api/cheeses/'.$cheeseListing->getId(), [
-            'json' => ['title' => 'Updated'],
+            'json' => ['title' => 'Updated', 'owner' => '/api/users/'.$user2->getId()],
         ]);
         $this->assertResponseStatusCodeSame(403);
 
