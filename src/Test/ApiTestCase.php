@@ -7,9 +7,15 @@ namespace App\Test;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase as BaseApiTestCase;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Client;
 use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ApiTestCase extends BaseApiTestCase
 {
+    protected static function getEntityManager(): EntityManagerInterface
+    {
+        return static::getContainer()->get('doctrine')->getManager();
+    }
+
     protected function createUser(string $email, string $password): User
     {
         $user = new User();
@@ -19,7 +25,7 @@ class ApiTestCase extends BaseApiTestCase
             ->encodePassword($user, $password);
         $user->setPassword($encodedPassword);
 
-        $em = static::getContainer()->get('doctrine')->getManager();
+        $em = static::getEntityManager();
         $em->persist($user);
         $em->flush();
 
