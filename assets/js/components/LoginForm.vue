@@ -27,8 +27,8 @@
     export default {
         data() {
             return {
-                email: '',
-                password: '',
+                email: 'cheesefan@example.com',
+                password: 'cheese',
                 error: '',
                 isLoading: false
             }
@@ -61,6 +61,3 @@
         },
     }
 </script>
-
-<style scoped lang="scss">
-</style>

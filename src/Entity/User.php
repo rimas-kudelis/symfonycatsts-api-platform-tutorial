@@ -53,7 +53,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column(type: 'json')]
-    #[Groups(["admin:write"])]
+    #[Groups(["admin:read", "admin:write"])]
     private array $roles = [];
 
     #[ORM\Column(type: 'string')]

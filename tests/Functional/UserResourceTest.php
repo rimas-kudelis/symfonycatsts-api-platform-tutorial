@@ -2,15 +2,11 @@
 
 namespace App\Tests\Functional;
 
-
-use App\Entity\User;
+use App\Factory\UserFactory;
 use App\Test\ApiTestCase;
-use Hautelook\AliceBundle\PhpUnit\ReloadDatabaseTrait;
 
 class UserResourceTest extends ApiTestCase
 {
-    use ReloadDatabaseTrait;
-
     public function testCreateUser(): void
     {
         $client = self::createClient();
@@ -30,8 +26,9 @@ class UserResourceTest extends ApiTestCase
     public function testUpdateUser(): void
     {
         $client = self::createClient();
+        $user = UserFactory::new()->create();
+        $this->logIn($client, $user);
 
-        $user = $this->createUserAndLogIn($client, 'cheeseplease@example.com', 'foo');
         $client->request('PUT', '/api/users/'.$user->getId(), [
             'json' => [
                 'username' => 'newUsername',
@@ -40,50 +37,41 @@ class UserResourceTest extends ApiTestCase
         ]);
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
-            'username' => 'newUsername',
+            'username' => 'newUsername'
         ]);
 
-        $em = $this->getEntityManager();
-        $user = $em->getRepository(User::class)->find($user->getId());
+        $user->refresh();
         $this->assertEquals(['ROLE_USER'], $user->getRoles());
     }
 
     public function testGetUser(): void
     {
         $client = self::createClient();
-
-        $user = $this->createUser('cheeseplease@example.com', 'foo');
-        $authenticatedUser = $this->createUserAndLogIn($client, 'cheeselord@example.com', 'foo');
-
-        $user->setPhoneNumber('555.123.4567');
-        $authenticatedUser->setPhoneNumber('123.456.7890');
-        $em = $this->getEntityManager();
-        $em->flush();
+        $user = UserFactory::new()->create(['phoneNumber' => '555.123.4567']);
+        $authenticatedUser = UserFactory::new()->create();
+        $this->logIn($client, $authenticatedUser);
 
         $client->request('GET', '/api/users/'.$user->getId());
         $this->assertJsonContains([
-            'username' => 'cheeseplease',
+            'username' => $user->getUsername(),
         ]);
 
         $data = $client->getResponse()->toArray();
         $this->assertArrayNotHasKey('phoneNumber', $data);
-
-        $client->request('GET', '/api/users/'.$authenticatedUser->getId());
         $this->assertJsonContains([
-            'username' => 'cheeselord',
-            'phoneNumber' => '123.456.7890',
+            'isMe' => false,
         ]);
 
-        // refresh the user and elevate them to admin
-        $user = $em->getRepository(User::class)->find($user->getId());
+        // refresh the user & elevate
+        $user->refresh();
         $user->setRoles(['ROLE_ADMIN']);
-        $em->flush();
-        $this->logIn($client, 'cheeseplease@example.com', 'foo');
+        $user->save();
+        $this->logIn($client, $user);
 
         $client->request('GET', '/api/users/'.$user->getId());
         $this->assertJsonContains([
-            'username' => 'cheeseplease',
             'phoneNumber' => '555.123.4567',
+            'isMe' => true,
         ]);
     }
 }

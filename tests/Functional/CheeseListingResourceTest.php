@@ -2,22 +2,21 @@
 
 namespace App\Tests\Functional;
 
-use App\Entity\CheeseListing;
+use App\Factory\CheeseListingFactory;
+use App\Factory\UserFactory;
 use App\Test\ApiTestCase;
-use Hautelook\AliceBundle\PhpUnit\ReloadDatabaseTrait;
 
 class CheeseListingResourceTest extends ApiTestCase
 {
-    use ReloadDatabaseTrait;
-
     public function testCreateCheeseListing(): void
     {
         $client = static::createClient();
         $client->request('POST', '/api/cheeses');
         $this->assertResponseStatusCodeSame(401);
 
-        $authenticatedUser = $this->createUserAndLogIn($client, 'cheeseplease@example.com', 'foo');
-        $otherUser = $this->createUser('cheeselord@example.com', 'foo');
+        $authenticatedUser = UserFactory::new()->create();
+        $otherUser = UserFactory::new()->create();
+        $this->logIn($client, $authenticatedUser);
 
         $cheeseData = [
             'title' => 'Some tasty cheese',
@@ -44,26 +43,21 @@ class CheeseListingResourceTest extends ApiTestCase
     public function testUpdateCheeseListing(): void
     {
         $client = static::createClient();
-        $user1 = $this->createUser('user1@example.com', 'foo');
-        $user2 = $this->createUser('user2@example.com', 'foo');
+        $user1 = UserFactory::new()->create();
+        $user2 = UserFactory::new()->create();
 
-        $cheeseListing = new CheeseListing('Block of Cheddar');
-        $cheeseListing->setOwner($user1);
-        $cheeseListing->setPrice(1000);
-        $cheeseListing->setDescription('Some spicy cheese');
-        $cheeseListing->setIsPublished(true);
+        $cheeseListing = CheeseListingFactory::new()->published()->create([
+            'owner' => $user1,
+        ]);
 
-        $em = static::getEntityManager();
-        $em->persist($cheeseListing);
-        $em->flush();
-
-        $this->logIn($client, 'user2@example.com', 'foo');
+        $this->logIn($client, $user2);
         $client->request('PUT', '/api/cheeses/'.$cheeseListing->getId(), [
+            // try to trick security by reassigning to this user
             'json' => ['title' => 'Updated', 'owner' => '/api/users/'.$user2->getId()],
         ]);
-        $this->assertResponseStatusCodeSame(403);
+        $this->assertResponseStatusCodeSame(403, 'only author can update');
 
-        $this->logIn($client, 'user1@example.com', 'foo');
+        $this->logIn($client, $user1);
         $client->request('PUT', '/api/cheeses/'.$cheeseListing->getId(), [
             'json' => ['title' => 'Updated'],
         ]);
@@ -73,59 +67,52 @@ class CheeseListingResourceTest extends ApiTestCase
     public function testGetCheeseListingCollection()
     {
         $client = static::createClient();
-        $user = $this->createUser('cheesebaron@example.com', 'foo');
+        $user = UserFactory::new()->create();
 
-        $cheeseListing1 = new CheeseListing('cheese1');
-        $cheeseListing1->setOwner($user);
-        $cheeseListing1->setTitle('Nice cheese');
-        $cheeseListing1->setPrice(1000);
-        $cheeseListing1->setDescription('Smelly');
+        $factory = CheeseListingFactory::new(['owner' => $user]);
+        // CL 1: unpublished
+        $factory->create();
 
-        $cheeseListing2 = new CheeseListing('cheese1');
-        $cheeseListing2->setOwner($user);
-        $cheeseListing2->setTitle('Nice cheese 2');
-        $cheeseListing2->setPrice(1000);
-        $cheeseListing2->setDescription('Smelly');
-        $cheeseListing2->setIsPublished(true);
+        // CL 2: published
+        $cheeseListing2 = $factory->published()->create([
+            'title' => 'cheese2',
+            'description' => 'cheese',
+            'price' => 1000,
+        ]);
 
-        $cheeseListing3 = new CheeseListing('cheese1');
-        $cheeseListing3->setOwner($user);
-        $cheeseListing3->setTitle('Nice cheese 3');
-        $cheeseListing3->setPrice(1000);
-        $cheeseListing3->setDescription('Smelly');
-        $cheeseListing3->setIsPublished(true);
-
-        $em = $this->getEntityManager();
-        $em->persist($cheeseListing1);
-        $em->persist($cheeseListing2);
-        $em->persist($cheeseListing3);
-        $em->flush();
+        // CL 3: published
+        $factory->published()->create();
 
         $client->request('GET', '/api/cheeses');
         $this->assertJsonContains(['hydra:totalItems' => 2]);
+        $this->assertJsonContains(['hydra:member' => [
+            0 => [
+                '@id' => '/api/cheeses/' . $cheeseListing2->getId(),
+                '@type' => 'Cheese',
+                'title' => 'cheese2',
+                'description' => 'cheese',
+                'price' => 1000,
+                'owner' => '/api/users/' . $user->getId(),
+                'shortDescription' => 'cheese',
+                'createdAtAgo' => '1 second ago',
+            ]
+        ]]);
     }
 
     public function testGetCheeseListingItem()
     {
         $client = static::createClient();
-        $user = $this->createUserAndLogIn($client, 'cheesebaron@example.com', 'foo');
+        $user = UserFactory::new()->create();
+        $this->logIn($client, $user);
+        $otherUser = UserFactory::new()->create();
 
-        $cheeseListing1 = new CheeseListing('cheese1');
-        $cheeseListing1->setOwner($user);
-        $cheeseListing1->setTitle('Nice cheese');
-        $cheeseListing1->setPrice(1000);
-        $cheeseListing1->setDescription('Smelly');
-        $cheeseListing1->setIsPublished(false);
-
-        $em = $this->getEntityManager();
-        $em->persist($cheeseListing1);
-        $em->flush();
+        $cheeseListing1 = CheeseListingFactory::new()->create(['owner' => $otherUser]);
 
         $client->request('GET', '/api/cheeses/'.$cheeseListing1->getId());
         $this->assertResponseStatusCodeSame(404);
 
-        $client->request('GET', '/api/users/'.$user->getId());
-        $data = $client->getResponse()->toArray();
+        $response = $client->request('GET', '/api/users/'.$otherUser->getId());
+        $data = $response->toArray();
         $this->assertEmpty($data['cheeseListings']);
     }
 }
