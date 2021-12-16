@@ -8,6 +8,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use App\Doctrine\CheeseListingSetOwnerListener;
 use App\Repository\CheeseListingRepository;
 use Carbon\Carbon;
 use Doctrine\ORM\Mapping as ORM;
@@ -56,6 +57,7 @@ use App\Validator as AppAssert;
 #[ApiFilter(RangeFilter::class, properties: ["price"])]
 #[ApiFilter(PropertyFilter::class)]
 #[ORM\Entity(repositoryClass: CheeseListingRepository::class)]
+#[ORM\EntityListeners([CheeseListingSetOwnerListener::class])]
 class CheeseListing
 {
     #[ORM\Id]
@@ -98,9 +100,8 @@ class CheeseListing
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'cheeseListings')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(["cheese:read", "cheese:collection:post"])]
-    #[Assert\NotBlank]
     #[AppAssert\IsValidOwner]
-    private ?User $owner;
+    private ?User $owner = null;
 
     public function __construct(string $title = null)
     {
@@ -212,7 +213,7 @@ class CheeseListing
         return $this->owner;
     }
 
-    public function setOwner(?User $owner): self
+    public function setOwner(User $owner): self
     {
         $this->owner = $owner;
 

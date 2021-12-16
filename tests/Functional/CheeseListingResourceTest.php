@@ -28,7 +28,7 @@ class CheeseListingResourceTest extends ApiTestCase
         $client->request('POST', '/api/cheeses', [
             'json' => $cheeseData,
         ]);
-        $this->assertResponseStatusCodeSame(422, 'Owner field is missing');
+        $this->assertResponseStatusCodeSame(201);
 
         $client->request('POST', '/api/cheeses', [
             'json' => $cheeseData + ['owner' => '/api/users/'.$otherUser->getId()],
