@@ -14,10 +14,10 @@ final class AdminGroupsContextBuilder implements SerializerContextBuilderInterfa
     private AuthorizationCheckerInterface $authorizationChecker;
 
     public function __construct(
-        SerializerContextBuilderInterface $decorated,
+        SerializerContextBuilderInterface $decoratedBuilder,
         AuthorizationCheckerInterface $authorizationChecker
     ) {
-        $this->decorated = $decorated;
+        $this->decorated = $decoratedBuilder;
         $this->authorizationChecker = $authorizationChecker;
     }
 
@@ -32,6 +32,7 @@ final class AdminGroupsContextBuilder implements SerializerContextBuilderInterfa
 
         if (isset($context['groups']) && $isAdmin) {
             $context['groups'][] = $normalization ? 'admin:read' : 'admin:write';
+            $context['groups'] = array_unique($context['groups']);
         }
 
         return $context;

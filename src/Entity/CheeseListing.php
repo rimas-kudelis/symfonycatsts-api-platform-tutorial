@@ -23,9 +23,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         ],
     ],
     itemOperations: [
-        "get" => [
-            "normalization_context" => ["groups" => ["cheese_listing:read", "cheese_listing:item:get"]]
-        ],
+        "get",
         "put" => [
             "security" => "is_granted('EDIT', object)",
             "security_message" => "Only the creator can edit a cheese listing.",
@@ -43,8 +41,6 @@ use Symfony\Component\Validator\Constraints as Assert;
         "pagination_items_per_page" => 10,
         "formats" => ["jsonld", "json", "html", "jsonhal", "csv" => ["text/csv"]],
     ],
-    denormalizationContext: ["groups" => ["cheese_listing:write"], "swagger_definition_name" => "Write"],
-    normalizationContext: ["groups" => ["cheese_listing:read"], "swagger_definition_name" => "Read"],
 )]
 #[ApiFilter(BooleanFilter::class, properties: ["isPublished"])]
 #[ApiFilter(

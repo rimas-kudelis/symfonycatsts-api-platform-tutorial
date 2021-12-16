@@ -36,8 +36,6 @@ use Symfony\Component\Validator\Constraints as Assert;
             "security" => "is_granted('ROLE_ADMIN')",
         ],
     ],
-    denormalizationContext: ["groups" => ["user:write"]],
-    normalizationContext: ["groups" => ["user:read"]],
     security: "is_granted('ROLE_USER')",
 )]
 #[ApiFilter(PropertyFilter::class)]
