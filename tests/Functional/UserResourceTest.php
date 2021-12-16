@@ -52,9 +52,11 @@ class UserResourceTest extends ApiTestCase
     {
         $client = self::createClient();
 
-        $user = $this->createUserAndLogIn($client, 'cheeseplease@example.com', 'foo');
+        $user = $this->createUser('cheeseplease@example.com', 'foo');
+        $authenticatedUser = $this->createUserAndLogIn($client, 'cheeselord@example.com', 'foo');
 
         $user->setPhoneNumber('555.123.4567');
+        $authenticatedUser->setPhoneNumber('123.456.7890');
         $em = $this->getEntityManager();
         $em->flush();
 
@@ -65,6 +67,12 @@ class UserResourceTest extends ApiTestCase
 
         $data = $client->getResponse()->toArray();
         $this->assertArrayNotHasKey('phoneNumber', $data);
+
+        $client->request('GET', '/api/users/'.$authenticatedUser->getId());
+        $this->assertJsonContains([
+            'username' => 'cheeselord',
+            'phoneNumber' => '123.456.7890',
+        ]);
 
         // refresh the user and elevate them to admin
         $user = $em->getRepository(User::class)->find($user->getId());

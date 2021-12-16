@@ -3,6 +3,7 @@
 namespace App\Serializer\Normalizer;
 
 use App\Entity\User;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
 use Symfony\Component\Serializer\Normalizer\ContextAwareNormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
@@ -13,19 +14,28 @@ class UserNormalizer implements ContextAwareNormalizerInterface, CacheableSuppor
     use NormalizerAwareTrait;
 
     private array $alreadyProcessedObjectIds = [];
+    private Security $security;
+
+    public function __construct(Security $security)
+    {
+        $this->security = $security;
+    }
 
     /**
      * @param User $object
      */
     public function normalize($object, $format = null, array $context = []): array
     {
-        if ($this->userIsOwner($object)) {
+        $isOwner = $this->userIsOwner($object);
+
+        if ($isOwner) {
             $context['groups'][] = 'owner:read';
         }
 
         $this->alreadyProcessedObjectIds[] = spl_object_id($object);
 
         $data = $this->normalizer->normalize($object, $format, $context);
+        $data['isMe'] = $isOwner;
 
         return $data;
     }
@@ -42,6 +52,9 @@ class UserNormalizer implements ContextAwareNormalizerInterface, CacheableSuppor
 
     private function UserIsOwner(User $user): bool
     {
-        return 5 >= rand(0, 9);
+        /** @var User|null $authenticatedUser */
+        $authenticatedUser = $this->security->getUser();
+
+        return null !== $authenticatedUser && $authenticatedUser->getEmail() === $user->getEmail();
     }
 }
