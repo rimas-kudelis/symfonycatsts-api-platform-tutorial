@@ -27,3 +27,8 @@ services:
     App\DataPersister\UserDataPersister:
         arguments:
             $decoratedPersister: '@api_platform.doctrine.orm.data_persister'
+
+    App\Serializer\AdminGroupsContextBuilder:
+        decorates: 'api_platform.serializer.context_builder'
+        arguments: [ '@.inner' ]
+        autoconfigure: false

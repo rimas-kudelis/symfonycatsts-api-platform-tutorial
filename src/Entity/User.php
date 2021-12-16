@@ -46,15 +46,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    private ?int $id;
+    private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     #[Groups(["user:read", "user:write"])]
     #[Assert\NotBlank]
     #[Assert\Email]
-    private ?string $email;
+    private ?string $email = null;
 
     #[ORM\Column(type: 'json')]
+    #[Groups(["admin:write"])]
     private array $roles = [];
 
     #[ORM\Column(type: 'string')]
@@ -74,6 +75,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["user:read", "user:write" ])]
     #[Assert\Valid]
     private Collection $cheeseListings;
+
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[Groups(["admin:read", "user:write" ])]
+    private ?string $phoneNumber = null;
 
     public function __construct()
     {
@@ -210,6 +215,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $cheeseListing->setOwner(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPhoneNumber(): ?string
+    {
+        return $this->phoneNumber;
+    }
+
+    public function setPhoneNumber(?string $phoneNumber): self
+    {
+        $this->phoneNumber = $phoneNumber;
 
         return $this;
     }
