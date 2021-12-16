@@ -4,17 +4,15 @@ namespace App\Serializer\Normalizer;
 
 use App\Entity\User;
 use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\ContextAwareNormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 
-class UserNormalizer implements NormalizerInterface, CacheableSupportsMethodInterface
+class UserNormalizer implements ContextAwareNormalizerInterface, CacheableSupportsMethodInterface, NormalizerAwareInterface
 {
-    private $normalizer;
+    use NormalizerAwareTrait;
 
-    public function __construct(ObjectNormalizer $normalizer)
-    {
-        $this->normalizer = $normalizer;
-    }
+    private array $alreadyProcessedObjectIds = [];
 
     /**
      * @param User $object
@@ -25,19 +23,21 @@ class UserNormalizer implements NormalizerInterface, CacheableSupportsMethodInte
             $context['groups'][] = 'owner:read';
         }
 
+        $this->alreadyProcessedObjectIds[] = spl_object_id($object);
+
         $data = $this->normalizer->normalize($object, $format, $context);
 
         return $data;
     }
 
-    public function supportsNormalization($data, $format = null): bool
+    public function supportsNormalization($data, $format = null, array $context = []): bool
     {
-        return $data instanceof User;
+        return $data instanceof User && !in_array(spl_object_id($data), $this->alreadyProcessedObjectIds);
     }
 
     public function hasCacheableSupportsMethod(): bool
     {
-        return true;
+        return false;
     }
 
     private function UserIsOwner(User $user): bool
