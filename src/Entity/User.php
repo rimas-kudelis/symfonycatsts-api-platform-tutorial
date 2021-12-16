@@ -70,7 +70,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private string $username;
 
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: CheeseListing::class, cascade: ['persist'], orphanRemoval: true)]
-    #[Groups(["user:read", "user:write" ])]
+    #[Groups(["user:write" ])]
     #[Assert\Valid]
     private Collection $cheeseListings;
 
@@ -215,6 +215,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection|CheeseListing[]
+     */
+    #[Groups(["user:read"])]
+    #[SerializedName("cheeseListings")]
+    public function getPublishedCheeseListings(): Collection
+    {
+        return $this->getCheeseListings()->filter(
+            static fn (CheeseListing $cheeseListing) => $cheeseListing->getIsPublished(),
+        );
     }
 
     public function getPhoneNumber(): ?string
