@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\ApiPlatform;
 
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Extension\QueryCollectionExtensionInterface;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Extension\QueryItemExtensionInterface;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use App\Entity\CheeseListing;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Security\Core\Security;
 
-class CheeseListingIsPublishedExtension implements QueryCollectionExtensionInterface
+class CheeseListingIsPublishedExtension implements QueryCollectionExtensionInterface, QueryItemExtensionInterface
 {
     private Security $security;
 
@@ -25,6 +26,22 @@ class CheeseListingIsPublishedExtension implements QueryCollectionExtensionInter
         string $resourceClass,
         string $operationName = null
     ): void {
+        $this->addWhereConditionIfNecessary($resourceClass, $queryBuilder);
+    }
+
+    public function applyToItem(
+        QueryBuilder $queryBuilder,
+        QueryNameGeneratorInterface $queryNameGenerator,
+        string $resourceClass,
+        array $identifiers,
+        string $operationName = null,
+        array $context = []
+    ) {
+        $this->addWhereConditionIfNecessary($resourceClass, $queryBuilder);
+    }
+
+    public function addWhereConditionIfNecessary(string $resourceClass, QueryBuilder $queryBuilder): void
+    {
         if (CheeseListing::class !== $resourceClass) {
             return;
         }
