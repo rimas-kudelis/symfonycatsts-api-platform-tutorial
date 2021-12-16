@@ -14,6 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Validator as AppAssert;
 
 #[ApiResource(
     collectionOperations: [
@@ -96,8 +97,9 @@ class CheeseListing
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'cheeseListings')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["cheese:read", "cheese:write"])]
-    #[Assert\Valid]
+    #[Groups(["cheese:read", "cheese:collection:post"])]
+    #[Assert\NotBlank]
+    #[AppAssert\IsValidOwner]
     private ?User $owner;
 
     public function __construct(string $title = null)

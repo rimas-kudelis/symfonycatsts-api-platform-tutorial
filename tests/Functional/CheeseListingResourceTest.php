@@ -16,12 +16,29 @@ class CheeseListingResourceTest extends ApiTestCase
         $client->request('POST', '/api/cheeses');
         $this->assertResponseStatusCodeSame(401);
 
-        $this->createUserAndLogIn($client, 'cheeseplease@example.com', 'foo');
+        $authenticatedUser = $this->createUserAndLogIn($client, 'cheeseplease@example.com', 'foo');
+        $otherUser = $this->createUser('cheeselord@example.com', 'foo');
+
+        $cheeseData = [
+            'title' => 'Some tasty cheese',
+            'description' => 'Very very tasty',
+            'price' => 5000,
+        ];
 
         $client->request('POST', '/api/cheeses', [
-            'json' => [],
+            'json' => $cheeseData,
         ]);
-        $this->assertResponseStatusCodeSame(422);
+        $this->assertResponseStatusCodeSame(422, 'Owner field is missing');
+
+        $client->request('POST', '/api/cheeses', [
+            'json' => $cheeseData + ['owner' => '/api/users/'.$otherUser->getId()],
+        ]);
+        $this->assertResponseStatusCodeSame(422, 'Wrong owner passed');
+
+        $client->request('POST', '/api/cheeses', [
+            'json' => $cheeseData + ['owner' => '/api/users/'.$authenticatedUser->getId()],
+        ]);
+        $this->assertResponseIsSuccessful();
     }
 
     public function testUpdateCheeseListing(): void
