@@ -28,10 +28,8 @@ services:
         arguments:
             $decoratedPersister: '@api_platform.doctrine.orm.data_persister'
 
-    App\Serializer\DefaultGroupsContextBuilder:
-        decorates: 'api_platform.serializer.context_builder'
-        decoration_priority: 20
-
     App\Serializer\AdminGroupsContextBuilder:
         decorates: 'api_platform.serializer.context_builder'
-        decoration_priority: 10
+
+    App\ApiPlatform\AutoGroupResourceMetadataFactory:
+        decorates: 'api_platform.metadata.resource.metadata_factory'
