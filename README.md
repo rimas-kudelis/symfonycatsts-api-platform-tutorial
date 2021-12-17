@@ -1,129 +1,87 @@
-# API Platform Tutorial
+docker-symfony
+==============
 
-Well hi there! This repository holds the code and script
-for the [API Platform](https://symfonycasts.com/screencast/api-platform) course on SymfonyCasts.
+[![Build Status](https://secure.travis-ci.org/eko/docker-symfony.png?branch=master)](http://travis-ci.org/eko/docker-symfony)
 
-## Setup
 
-If you've just downloaded the code, congratulations!!
+This is a complete stack for running Symfony 5 (latest version), PHP8 and ELK stack using docker-compose tool.
 
-To get it working, follow these steps:
+# Installation
 
-**1) Download Composer dependencies**
+First, clone this repository:
 
-Make sure you have [Composer installed](https://getcomposer.org/download/)
-and then run:
-
-```
-composer install
+```bash
+$ git clone https://github.com/eko/docker-symfony.git
 ```
 
-You may alternatively need to run `php composer.phar install`, depending
-on how you installed Composer.
+Next, put your Symfony application into `symfony` folder and do not forget to add `symfony.localhost` in your `/etc/hosts` file.
 
-**2) Start the symfony web server**
+Make sure you adjust `database_host` in `parameters.yml` to the database container alias "db" (for Symfony < 4)
+Make sure you adjust `DATABASE_URL` in `env` to the database container alias "db" (for Symfony >= 4)
 
-You can use Nginx or Apache, but Symfony's local web server
-works even better - especially if you're using Docker for
-the database.
+Then, run:
 
-To install the Symfony local web server, follow
-"Downloading the Symfony client" instructions found
-here: https://symfony.com/download - you only need to do this
-once on your system.
-
-Then, to start the web server, open a terminal, move into the
-project, and run:
-
-```
-symfony serve -d
+```bash
+$ docker-compose up
 ```
 
-(If this is your first time using this command, you may see an
-error that you need to run `symfony server:ca:install` first).
+You are done, you can visit your Symfony application on the following URL: `http://symfony.localhost` (and access Kibana on `http://symfony.localhost:81`)
 
-Now check out the site at `https://localhost:8000`. You'll see
-an error now - finish the setup instructions to get things working!
+_Note :_ you can rebuild all Docker images by running:
 
-** 3) Database Setup (with Docker)**
-
-The easiest way to set up the database is to use the `docker-compose.yaml`
-file that's included in this project. First, make sure Docker is downloaded
-and running on your machine. Then, from inside the project, run:
-
-```
-docker-compose up -d
+```bash
+$ docker-compose build
 ```
 
-Congrats! You now have a database running! And as long as you use the
-"symfony binary" web server (described below), the `DATABASE_URL`
-environment variable will automatically be exposed to your web server:
-no need to configure `.env`.
+# How it works?
 
-For more information about this approach, see https://symfonycasts.com/screencast/symfony5-doctrine
+Here are the `docker-compose` built images:
 
-** 3 Alternative) Database Setup (without Docker)**
+* `db`: This is the MySQL database container (can be changed to postgresql or whatever in `docker-compose.yml` file),
+* `php`: This is the PHP-FPM container including the application volume mounted on,
+* `nginx`: This is the Nginx webserver container in which php volumes are mounted too,
+* `elasticsearch`: This is the Elasticsearch server used to store our web server and application logs,
+* `logstash`: This is the Logstash tool from Elastic Stack that allows to read logs and send them into our Elasticsearch server,
+* `kibana`: This is the Kibana UI that is used to render logs and create beautiful dashboards. 
 
-If you do not want to use Docker, you can also just install and run
-MySQL manually. When you're done, open the `.env` file and make any
-adjustments you need - specifically `DATABASE_URL`. Or, better,
-you can create a `.env.local` file and *override* any configuration
-you need there (instead of changing `.env` directly).
+This results in the following running containers:
 
-** 4) Database Schema**
-
-To actually *create* the database and get some tables, run:
-
-```
-symfony console doctrine:database:create
-symfony console doctrine:migrations:migrate
-symfony console doctrine:fixtures:load
-```
-
-This uses the `symfony` binary, but `symfony console` is identical
-to `php bin/console`, except that this allows the `DATABASE_URL`
-environment variable to be injected if you're using Docker.
-
-If you get an error that the database exists, that should
-be ok. But if you have problems, completely drop the
-database (`doctrine:database:drop --force`) and try again.
-
-** 4b) Database Schema for Tests**
-
-To execute the tests, you may (if you're using the Docker integration)
-need to also initialize the database inside the test database container:
-
-```
-symfony console doctrine:database:create --env=test
-symfony console doctrine:migrations:migrate --env=test
+```bash
+> $ docker-compose ps
+             Name                           Command               State                 Ports
+-----------------------------------------------------------------------------------------------------------
+mysql                            docker-entrypoint.sh --def ...   Up      0.0.0.0:3306->3306/tcp, 33060/tcp
+elasticsearch                    /usr/local/bin/docker-entr ...   Up      0.0.0.0:9200->9200/tcp, 9300/tcp
+kibana                           /usr/local/bin/dumb-init - ...   Up      0.0.0.0:81->5601/tcp
+logstash                         /usr/local/bin/docker-entr ...   Up      5044/tcp, 9600/tcp
+nginx                            nginx                            Up      443/tcp, 0.0.0.0:80->80/tcp
+php-fpm                          php-fpm7 -F                      Up      0.0.0.0:9000->9001/tcp
 ```
 
-** 5) Optional: Compiling Webpack Encore Assets**
+# Environment Customizations
 
-This tutorial uses [Webpack Encore](https://symfonycasts.com/encore),
-which isn't important to understand what's going on. The compiled
-assets are already included in the download, so unless you want to
-play around with the JavaScript, you can skip this step.
+You can customize the exposed ports and other parameters changing the docker-compose .env file.
 
-Make sure to install Node and also [yarn](https://yarnpkg.com).
-Then run:
+# Read logs
 
-```
-yarn install
-yarn encore dev --watch
-```
+You can access Nginx and Symfony application logs in the following directories on your host machine:
 
-Have fun!
+* `logs/nginx`
+* `logs/symfony`
 
-## Have Ideas, Feedback or an Issue?
+# Use Kibana!
 
-If you have suggestions or questions, please feel free to
-open an issue on this repository or comment on the course
-itself. We're watching both :).
+You can also use Kibana to visualize Nginx & Symfony logs by visiting `http://symfony.localhost:81`.
 
-## Thanks!
+# Use xdebug!
 
-And as always, thanks so much for your support and letting
-us do what we love!
+Start by updating your docker-compose .env file with `PHP_XDEBUG_MODE=debug` (or any other configuration you need as seen in the [Xdebug documentation](https://xdebug.org/docs/all_settings#mode)).
+You will need to re-build the php container for this value to take effect.
 
-<3 Your friends at SymfonyCasts
+Configure your IDE to use port 5902 for XDebug.
+Docker versions below 18.03.1 don't support the Docker variable `host.docker.internal`.  
+In that case you'd have to swap out `host.docker.internal` with your machine IP address in php-fpm/xdebug.ini.
+
+# Code license
+
+You are free to use the code in this repository under the terms of the 0-clause BSD license. LICENSE contains a copy of this license.
