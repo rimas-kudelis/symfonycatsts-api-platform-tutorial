@@ -9,21 +9,25 @@ use ApiPlatform\Core\DataPersister\DataPersisterInterface;
 use App\Entity\User;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Core\Security;
 
 class UserDataPersister implements ContextAwareDataPersisterInterface
 {
     private DataPersisterInterface $decoratedPersister;
     private UserPasswordHasherInterface $passwordHasher;
     private LoggerInterface $logger;
+    private Security $security;
 
     public function __construct(
         DataPersisterInterface $decoratedPersister,
         UserPasswordHasherInterface $passwordHasher,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        Security $security
     ) {
         $this->decoratedPersister = $decoratedPersister;
         $this->passwordHasher = $passwordHasher;
         $this->logger = $logger;
+        $this->security = $security;
     }
     public function supports($data, array $context = []): bool
     {
@@ -48,6 +52,8 @@ class UserDataPersister implements ContextAwareDataPersisterInterface
             $data->setPassword($this->passwordHasher->hashPassword($data, $data->getPlainPassword()));
             $data->eraseCredentials();
         }
+
+        $data->setIsMe($this->security->getUser() === $data);
 
         $this->decoratedPersister->persist($data);
     }

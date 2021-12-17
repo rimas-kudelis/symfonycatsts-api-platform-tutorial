@@ -30,7 +30,8 @@ services:
 
     App\DataProvider\UserDataProvider:
         arguments:
-            $decoratedProvider: '@api_platform.doctrine.orm.default.collection_data_provider'
+            $decoratedCollectionDataProvider: '@api_platform.doctrine.orm.default.collection_data_provider'
+            $decoratedItemDataProvider: '@api_platform.doctrine.orm.default.item_data_provider'
 
     App\DataPersister\CheeseListingDataPersister:
         arguments:
