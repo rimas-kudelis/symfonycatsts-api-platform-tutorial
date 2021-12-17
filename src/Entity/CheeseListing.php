@@ -95,6 +95,7 @@ class CheeseListing
     private \DateTimeImmutable $createdAt;
 
     #[ORM\Column(type: 'boolean')]
+    #[Groups(['cheese:write'])]
     private bool $isPublished = false;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'cheeseListings')]
