@@ -28,6 +28,10 @@ services:
         arguments:
             $decoratedPersister: '@api_platform.doctrine.orm.data_persister'
 
+    App\DataPersister\CheeseListingDataPersister:
+        arguments:
+            $decoratedPersister: '@api_platform.doctrine.orm.data_persister'
+
     App\Serializer\AdminGroupsContextBuilder:
         decorates: 'api_platform.serializer.context_builder'
 

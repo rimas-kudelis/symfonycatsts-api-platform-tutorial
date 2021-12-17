@@ -3,6 +3,7 @@
 namespace App\Tests\Functional;
 
 use App\Factory\CheeseListingFactory;
+use App\Factory\CheeseNotificationFactory;
 use App\Factory\UserFactory;
 use App\Test\ApiTestCase;
 
@@ -80,6 +81,12 @@ class CheeseListingResourceTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(200);
         $cheeseListing->refresh();
         $this->assertTrue($cheeseListing->getIsPublished());
+        CheeseNotificationFactory::repository()->assert()->count(1, 'There should be one notification about a newly published cheese listing after first publish.');
+
+        $client->request('PUT', '/api/cheeses/'.$cheeseListing->getId(), [
+            'json' => ['isPublished' => true],
+        ]);
+        CheeseNotificationFactory::repository()->assert()->count(1, 'There should be one notification about a newly published cheese listing after second publish.');
     }
 
     public function testGetCheeseListingCollection()
