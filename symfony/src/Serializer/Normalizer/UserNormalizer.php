@@ -34,10 +34,7 @@ class UserNormalizer implements ContextAwareNormalizerInterface, CacheableSuppor
 
         $this->alreadyProcessedObjectIds[] = spl_object_id($object);
 
-        $data = $this->normalizer->normalize($object, $format, $context);
-        $data['isMe'] = $isOwner;
-
-        return $data;
+        return $this->normalizer->normalize($object, $format, $context);
     }
 
     public function supportsNormalization($data, $format = null, array $context = []): bool

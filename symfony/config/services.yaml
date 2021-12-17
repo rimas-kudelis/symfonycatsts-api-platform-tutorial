@@ -28,6 +28,10 @@ services:
         arguments:
             $decoratedPersister: '@api_platform.doctrine.orm.data_persister'
 
+    App\DataProvider\UserDataProvider:
+        arguments:
+            $decoratedProvider: '@api_platform.doctrine.orm.default.collection_data_provider'
+
     App\DataPersister\CheeseListingDataPersister:
         arguments:
             $decoratedPersister: '@api_platform.doctrine.orm.data_persister'
