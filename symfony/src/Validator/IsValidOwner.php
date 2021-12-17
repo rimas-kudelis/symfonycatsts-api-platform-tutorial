@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Constraint;
 #[\Attribute]
 class IsValidOwner extends Constraint
 {
-    public $message = 'Cannot set owner to a different user.';
+    public string $message = 'Cannot set owner to a different user.';
 
-    public $anonymousMessage = 'Cannot set owner unless you are authenticated';
+    public string $anonymousMessage = 'Cannot set owner unless you are authenticated';
 }

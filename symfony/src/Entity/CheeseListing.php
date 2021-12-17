@@ -58,6 +58,7 @@ use App\Validator as AppAssert;
 #[ApiFilter(PropertyFilter::class)]
 #[ORM\Entity(repositoryClass: CheeseListingRepository::class)]
 #[ORM\EntityListeners([CheeseListingSetOwnerListener::class])]
+#[AppAssert\ValidIsPublished]
 class CheeseListing
 {
     #[ORM\Id]
