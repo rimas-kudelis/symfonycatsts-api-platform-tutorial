@@ -10,14 +10,14 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 final class AdminGroupsContextBuilder implements SerializerContextBuilderInterface
 {
-    private SerializerContextBuilderInterface $decorated;
+    private SerializerContextBuilderInterface $decoratedBuilder;
     private AuthorizationCheckerInterface $authorizationChecker;
 
     public function __construct(
         SerializerContextBuilderInterface $decoratedBuilder,
         AuthorizationCheckerInterface $authorizationChecker
     ) {
-        $this->decorated = $decoratedBuilder;
+        $this->decoratedBuilder = $decoratedBuilder;
         $this->authorizationChecker = $authorizationChecker;
     }
 
@@ -26,7 +26,7 @@ final class AdminGroupsContextBuilder implements SerializerContextBuilderInterfa
         bool $normalization,
         ?array $extractedAttributes = null
     ): array {
-        $context = $this->decorated->createFromRequest($request, $normalization, $extractedAttributes);
+        $context = $this->decoratedBuilder->createFromRequest($request, $normalization, $extractedAttributes);
 
         $context['groups'] = $context['groups'] ?? [];
 
