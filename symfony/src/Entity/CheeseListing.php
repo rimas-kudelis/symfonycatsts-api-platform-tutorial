@@ -8,6 +8,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use App\ApiPlatform\CheeseSearchFilter;
 use App\Doctrine\CheeseListingSetOwnerListener;
 use App\Repository\CheeseListingRepository;
 use Carbon\Carbon;
@@ -56,6 +57,7 @@ use App\Validator as AppAssert;
 )]
 #[ApiFilter(RangeFilter::class, properties: ["price"])]
 #[ApiFilter(PropertyFilter::class)]
+#[ApiFilter(CheeseSearchFilter::class)]
 #[ORM\Entity(repositoryClass: CheeseListingRepository::class)]
 #[ORM\EntityListeners([CheeseListingSetOwnerListener::class])]
 #[AppAssert\ValidIsPublished]
