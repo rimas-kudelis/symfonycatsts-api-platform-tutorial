@@ -5,27 +5,28 @@ declare(strict_types=1);
 namespace App\DataProvider;
 
 use ApiPlatform\Core\DataProvider\CollectionDataProviderInterface;
+use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use App\ApiResource\DailyStats;
-use App\Repository\CheeseListingRepository;
+use App\Service\StatsHelper;
 
-class DailyStatsProvider implements CollectionDataProviderInterface, RestrictedDataProviderInterface
+class DailyStatsProvider implements CollectionDataProviderInterface, ItemDataProviderInterface, RestrictedDataProviderInterface
 {
-    private CheeseListingRepository $cheeseListingRepository;
+    private StatsHelper $statsHelper;
 
-    public function __construct(CheeseListingRepository $cheeseListingRepository)
+    public function __construct(StatsHelper $statsHelper)
     {
-        $this->cheeseListingRepository = $cheeseListingRepository;
+        $this->statsHelper = $statsHelper;
     }
 
     public function getCollection(string $resourceClass, string $operationName = null)
     {
-        $listings = $this->cheeseListingRepository->findBy([], [], 5);
+        return $this->statsHelper->fetchMany();
+    }
 
-        $stats = new DailyStats(new \DateTimeImmutable(), 1000, $listings);
-        $stats2 = new DailyStats(new \DateTimeImmutable('-1 days'), 2000, $listings);
-
-        return [$stats, $stats2];
+    public function getItem(string $resourceClass, $id, string $operationName = null, array $context = [])
+    {
+        return $this->statsHelper->fetchOne($id);
     }
 
     public function supports(string $resourceClass, string $operationName = null, array $context = []): bool
