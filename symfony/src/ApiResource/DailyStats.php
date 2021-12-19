@@ -12,6 +12,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     collectionOperations: ['get'],
     itemOperations: ['get'],
+    paginationItemsPerPage: 7,
 )]
 class DailyStats
 {
