@@ -11,7 +11,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ApiResource(
     collectionOperations: ['get'],
-    itemOperations: ['get'],
+    itemOperations: ['get', 'put'],
     paginationItemsPerPage: 7,
 )]
 class DailyStats
@@ -19,7 +19,7 @@ class DailyStats
     #[Groups(['dailystats:read'])]
     public \DateTimeInterface $date;
 
-    #[Groups(['dailystats:read'])]
+    #[Groups(['dailystats:read', 'dailystats:write'])]
     public int $totalVisitors;
 
     /**
