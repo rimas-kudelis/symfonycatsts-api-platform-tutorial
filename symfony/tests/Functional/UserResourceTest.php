@@ -47,7 +47,10 @@ class UserResourceTest extends ApiTestCase
     public function testGetUser(): void
     {
         $client = self::createClient();
-        $user = UserFactory::new()->create(['phoneNumber' => '555.123.4567']);
+        $user = UserFactory::new()->create([
+            'phoneNumber' => '555.123.4567',
+            'username' => 'cheesehead'
+        ]);
         $authenticatedUser = UserFactory::new()->create();
         $this->logIn($client, $authenticatedUser);
 
@@ -55,6 +58,7 @@ class UserResourceTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
             'username' => $user->getUsername(),
+            'isMvp' => true,
         ]);
 
         $data = $client->getResponse()->toArray();

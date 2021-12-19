@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use App\Doctrine\UserSetIsMvpListener;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -16,6 +17,7 @@ use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\EntityListeners([UserSetIsMvpListener::class])]
 #[ApiResource(
     collectionOperations: [
         "get",
@@ -83,6 +85,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[Groups(["user:read"])]
     private bool $isMe = false;
+
+    /**
+     * True if this is an MVP.
+     */
+    #[Groups(["user:read"])]
+    private bool $isMvp = false;
 
     public function __construct()
     {
@@ -255,5 +263,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsMe(bool $isMe): void
     {
         $this->isMe = $isMe;
+    }
+
+    public function getIsMvp(): bool
+    {
+        return $this->isMvp;
+    }
+
+    public function setIsMvp(bool $isMvp): void
+    {
+        $this->isMvp = $isMvp;
     }
 }
