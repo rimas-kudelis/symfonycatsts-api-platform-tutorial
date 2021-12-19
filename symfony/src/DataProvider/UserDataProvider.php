@@ -32,9 +32,9 @@ class UserDataProvider implements ContextAwareCollectionDataProviderInterface, R
         $users = $this->decoratedCollectionDataProvider->getCollection($resourceClass, $operationName, $context);
 
         $currentUser = $this->security->getUser();
-        foreach ($users as $user) {
-            $user->setIsMe($currentUser === $user);
-        }
+//        foreach ($users as $user) {
+//            $user->setIsMe($currentUser === $user);
+//        }
 
         return $users;
     }
@@ -44,9 +44,9 @@ class UserDataProvider implements ContextAwareCollectionDataProviderInterface, R
         /** @var User|null $item */
         $item = $this->decoratedItemDataProvider->getItem($resourceClass, $id, $operationName, $context);
 
-        if ($item instanceof User) {
-            $item->setIsMe($item === $this->security->getUser());
-        }
+//        if ($item instanceof User) {
+//            $item->setIsMe($item === $this->security->getUser());
+//        }
 
         return $item;
     }

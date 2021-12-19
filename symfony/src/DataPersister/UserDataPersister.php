@@ -53,7 +53,8 @@ class UserDataPersister implements ContextAwareDataPersisterInterface
             $data->eraseCredentials();
         }
 
-        $data->setIsMe($this->security->getUser() === $data);
+        // Handled by a Doctrine listener.
+        //$data->setIsMe($this->security->getUser() === $data);
 
         $this->decoratedPersister->persist($data);
     }
