@@ -232,7 +232,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection|CheeseListing[]
+     * @return Collection<CheeseListing>
      */
     #[Groups(["user:read"])]
     #[SerializedName("cheeseListings")]
