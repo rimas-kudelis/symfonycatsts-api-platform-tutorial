@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dto;
 
+use App\Entity\CheeseListing;
 use App\Entity\User;
 use Carbon\Carbon;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -26,6 +27,18 @@ class CheeseListingOutput
 
     #[Groups(['cheese:read'])]
     public User $owner;
+
+    public static function createFromEntity(CheeseListing $cheeseListing): self
+    {
+        $output = new self();
+        $output->title = $cheeseListing->getTitle();
+        $output->description = $cheeseListing->getDescription();
+        $output->price = $cheeseListing->getPrice();
+        $output->createdAt = $cheeseListing->getCreatedAt();
+        $output->owner = $cheeseListing->getOwner();
+
+        return $output;
+    }
 
     /**
      * Shortened text of the description.

@@ -41,23 +41,10 @@ class CheeseListingInputDenormalizer implements DenormalizerInterface, Cacheable
     {
         $entity = $context['object_to_populate'] ?? null;
 
-        $dto = new CheeseListingInput();
-
-        // not an edit, so just return an empty DTO
-        if (null === $entity) {
-            return $dto;
-        }
-
-        if (!$entity instanceof CheeseListing) {
+        if (null !== $entity && !$entity instanceof CheeseListing) {
             throw new \Exception(sprintf('Unexpected resource class "%s"', get_class($entity)));
         }
 
-        $dto->title = $entity->getTitle();
-        $dto->price = $entity->getPrice();
-        $dto->description = $entity->getDescription();
-        $dto->owner = $entity->getOwner();
-        $dto->isPublished = $entity->getIsPublished();
-
-        return $dto;
+        return CheeseListingInput::createFromEntity($entity);
     }
 }
