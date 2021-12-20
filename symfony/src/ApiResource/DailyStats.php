@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     itemOperations: ['get', 'put'],
     paginationItemsPerPage: 7,
 )]
-#[ApiFilter(DailyStatsDateFilter::class)]
+#[ApiFilter(filterClass: DailyStatsDateFilter::class, arguments: ['throwOnInvalid' => true])]
 class DailyStats
 {
     #[Groups(['dailystats:read'])]
