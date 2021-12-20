@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Entity\DailyStats;
+use App\ApiResource\DailyStats;
 use App\Repository\CheeseListingRepository;
 
 class StatsHelper

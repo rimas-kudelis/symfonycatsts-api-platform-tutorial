@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\ApiResource;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\ApiPlatform\DailyStatsDateFilter;
 use App\Entity\CheeseListing;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -14,6 +16,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     itemOperations: ['get', 'put'],
     paginationItemsPerPage: 7,
 )]
+#[ApiFilter(DailyStatsDateFilter::class)]
 class DailyStats
 {
     #[Groups(['dailystats:read'])]
@@ -39,7 +42,6 @@ class DailyStats
         $this->totalVisitors = $totalVisitors;
         $this->mostPopularListings = $mostPopularListings;
     }
-
 
     #[ApiProperty(identifier: true)]
     public function getDateString(): string

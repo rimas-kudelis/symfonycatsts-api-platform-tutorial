@@ -7,6 +7,7 @@ namespace App\DataProvider;
 use ApiPlatform\Core\DataProvider\PaginatorInterface;
 use App\Service\StatsHelper;
 use ArrayIterator;
+use DateTimeInterface;
 
 class DailyStatsPaginator implements PaginatorInterface, \IteratorAggregate
 {
@@ -14,6 +15,7 @@ class DailyStatsPaginator implements PaginatorInterface, \IteratorAggregate
     private StatsHelper $statsHelper;
     private int $currentPage;
     private int $maxResults;
+    private ?DateTimeInterface $fromDate;
 
     public function __construct(StatsHelper $statsHelper, int $currentPage, int $maxResults)
     {
@@ -52,14 +54,24 @@ class DailyStatsPaginator implements PaginatorInterface, \IteratorAggregate
         if (null === $this->dailyStatsIterator) {
             $offset = (int)(string)(($this->getCurrentPage() - 1) * $this->getItemsPerPage());
 
+            $criteria = [];
+            if (null !== $this->fromDate) {
+                $criteria['from'] = $this->fromDate;
+            }
             $this->dailyStatsIterator = new ArrayIterator(
                 $this->statsHelper->fetchMany(
                     $this->maxResults,
                     $offset,
+                    $criteria,
                 ),
             );
         }
 
         return $this->dailyStatsIterator;
+    }
+
+    public function setFromDate(?DateTimeInterface $fromDate): void
+    {
+        $this->fromDate = $fromDate;
     }
 }
