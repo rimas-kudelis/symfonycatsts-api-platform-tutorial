@@ -10,6 +10,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 use App\ApiPlatform\CheeseSearchFilter;
 use App\Doctrine\CheeseListingSetOwnerListener;
+use App\Dto\CheeseListingOutput;
 use App\Repository\CheeseListingRepository;
 use Carbon\Carbon;
 use Doctrine\ORM\Mapping as ORM;
@@ -44,6 +45,7 @@ use App\Validator as AppAssert;
         "pagination_items_per_page" => 10,
         "formats" => ["jsonld", "json", "html", "jsonhal", "csv" => ["text/csv"]],
     ],
+    output: CheeseListingOutput::class,
 )]
 #[ApiFilter(BooleanFilter::class, properties: ["isPublished"])]
 #[ApiFilter(
