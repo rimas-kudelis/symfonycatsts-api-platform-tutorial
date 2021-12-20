@@ -4,6 +4,7 @@ namespace App\Tests\Functional;
 
 use App\Factory\UserFactory;
 use App\Test\ApiTestCase;
+use Symfony\Component\Uid\Uuid;
 
 class UserResourceTest extends ApiTestCase
 {
@@ -27,6 +28,26 @@ class UserResourceTest extends ApiTestCase
         ]);
 
         $this->logIn($client, 'cheeseplease@example.com', 'foo');
+    }
+
+    public function testCreateUserWithUuid(): void
+    {
+        $client = self::createClient();
+
+        $uuid = Uuid::v4();
+        $client->request('POST', '/api/users', [
+            'json' => [
+                'uuid' => $uuid,
+                'email' => 'cheeseplease@example.com',
+                'username' => 'cheeseplease',
+                'password' => 'foo',
+            ],
+        ]);
+        $this->assertResponseStatusCodeSame(201);
+
+        $this->assertJsonContains([
+            '@id' => '/api/users/'.$uuid,
+        ]);
     }
 
     public function testUpdateUser(): void
