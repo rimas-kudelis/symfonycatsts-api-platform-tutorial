@@ -13,9 +13,8 @@ use App\Doctrine\CheeseListingSetOwnerListener;
 use App\Dto\CheeseListingInput;
 use App\Dto\CheeseListingOutput;
 use App\Repository\CheeseListingRepository;
-use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator as AppAssert;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ApiResource(
     collectionOperations: [
@@ -73,23 +72,18 @@ class CheeseListing
      * Title of the listing.
      */
     #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 2, max: 50, maxMessage: "The title should be 50 characters or less")]
     private ?string $title;
 
     /**
      * HTML-formatted description of this listing.
      */
     #[ORM\Column(type: 'text')]
-    #[Assert\NotBlank]
     private string $description;
 
     /**
      * Price of the cheese in cents.
      */
     #[ORM\Column(type: 'integer')]
-    #[Assert\NotBlank]
-    #[Assert\GreaterThan(value: 0)]
     private int $price;
 
     #[ORM\Column(type: 'datetime_immutable')]
@@ -100,7 +94,6 @@ class CheeseListing
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'cheeseListings')]
     #[ORM\JoinColumn(nullable: false)]
-    #[AppAssert\IsValidOwner]
     private ?User $owner = null;
 
     public function __construct(string $title = null)

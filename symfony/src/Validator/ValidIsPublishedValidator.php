@@ -39,7 +39,7 @@ class ValidIsPublishedValidator extends ConstraintValidator
         }
 
         if (!$value instanceof CheeseListing) {
-            throw new InvalidArgumentException('The ValidIsPublisher constraint must be put on a CheeseListing object.');
+            throw new InvalidArgumentException('The ValidIsPublished constraint must be put on a CheeseListing object.');
         }
 
         $originalData = $this->entityManager->getUnitOfWork()->getOriginalEntityData($value);
