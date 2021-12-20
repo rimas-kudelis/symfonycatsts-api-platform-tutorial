@@ -10,12 +10,10 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 use App\ApiPlatform\CheeseSearchFilter;
 use App\Doctrine\CheeseListingSetOwnerListener;
+use App\Dto\CheeseListingInput;
 use App\Dto\CheeseListingOutput;
 use App\Repository\CheeseListingRepository;
-use Carbon\Carbon;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator as AppAssert;
 
@@ -45,6 +43,7 @@ use App\Validator as AppAssert;
         "pagination_items_per_page" => 10,
         "formats" => ["jsonld", "json", "html", "jsonhal", "csv" => ["text/csv"]],
     ],
+    input: CheeseListingInput::class,
     output: CheeseListingOutput::class,
 )]
 #[ApiFilter(BooleanFilter::class, properties: ["isPublished"])]
@@ -74,7 +73,6 @@ class CheeseListing
      * Title of the listing.
      */
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(["cheese:write", "user:write"])]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 50, maxMessage: "The title should be 50 characters or less")]
     private ?string $title;
@@ -90,7 +88,6 @@ class CheeseListing
      * Price of the cheese in cents.
      */
     #[ORM\Column(type: 'integer')]
-    #[Groups(["cheese:write", "user:write"])]
     #[Assert\NotBlank]
     #[Assert\GreaterThan(value: 0)]
     private int $price;
@@ -99,12 +96,10 @@ class CheeseListing
     private \DateTimeImmutable $createdAt;
 
     #[ORM\Column(type: 'boolean')]
-    #[Groups(['cheese:write'])]
     private bool $isPublished = false;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'cheeseListings')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["cheese:collection:post"])]
     #[AppAssert\IsValidOwner]
     private ?User $owner = null;
 
@@ -151,18 +146,6 @@ class CheeseListing
     public function setDescription(string $description): self
     {
         $this->description = $description;
-
-        return $this;
-    }
-
-    /**
-     * Description of this listing as plain text.
-     */
-    #[Groups(["cheese:write", "user:write"])]
-    #[SerializedName("description")]
-    public function setTextDescription(string $description): self
-    {
-        $this->description = nl2br($description);
 
         return $this;
     }
