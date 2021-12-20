@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 use App\Doctrine\UserSetIsMvpListener;
@@ -44,11 +45,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiFilter(PropertyFilter::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    #[ApiProperty(identifier: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
+    #[ApiProperty(identifier: true)]
     #[ORM\Column(type: 'uuid', unique: true)]
     private Uuid $uuid;
 
@@ -105,6 +108,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getUuid(): Uuid
+    {
+        return $this->uuid;
     }
 
     public function getEmail(): ?string

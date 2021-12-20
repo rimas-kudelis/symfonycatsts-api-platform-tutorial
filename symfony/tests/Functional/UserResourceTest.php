@@ -20,6 +20,12 @@ class UserResourceTest extends ApiTestCase
         ]);
         $this->assertResponseStatusCodeSame(201);
 
+        $user = UserFactory::repository()->findOneBy(['email' => 'cheeseplease@example.com']);
+        $this->assertNotNull($user);
+        $this->assertJsonContains([
+            '@id' => '/api/users/'.$user->getUuid(),
+        ]);
+
         $this->logIn($client, 'cheeseplease@example.com', 'foo');
     }
 
@@ -29,7 +35,7 @@ class UserResourceTest extends ApiTestCase
         $user = UserFactory::new()->create();
         $this->logIn($client, $user);
 
-        $client->request('PUT', '/api/users/'.$user->getId(), [
+        $client->request('PUT', '/api/users/'.$user->getUuid(), [
             'json' => [
                 'username' => 'newUsername',
                 'roles' => ['ROLE_ADMIN'], // must be ignored
@@ -54,7 +60,7 @@ class UserResourceTest extends ApiTestCase
         $authenticatedUser = UserFactory::new()->create();
         $this->logIn($client, $authenticatedUser);
 
-        $client->request('GET', '/api/users/'.$user->getId());
+        $client->request('GET', '/api/users/'.$user->getUuid());
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
             'username' => $user->getUsername(),
@@ -73,7 +79,7 @@ class UserResourceTest extends ApiTestCase
         $user->save();
         $this->logIn($client, $user);
 
-        $client->request('GET', '/api/users/'.$user->getId());
+        $client->request('GET', '/api/users/'.$user->getUuid());
         $this->assertJsonContains([
             'phoneNumber' => '555.123.4567',
             'isMe' => true,

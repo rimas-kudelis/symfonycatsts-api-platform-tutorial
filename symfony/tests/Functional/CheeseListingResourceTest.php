@@ -31,12 +31,12 @@ class CheeseListingResourceTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(201);
 
         $client->request('POST', '/api/cheeses', [
-            'json' => $cheeseData + ['owner' => '/api/users/'.$otherUser->getId()],
+            'json' => $cheeseData + ['owner' => '/api/users/'.$otherUser->getUuid()],
         ]);
         $this->assertResponseStatusCodeSame(422, 'Wrong owner passed');
 
         $client->request('POST', '/api/cheeses', [
-            'json' => $cheeseData + ['owner' => '/api/users/'.$authenticatedUser->getId()],
+            'json' => $cheeseData + ['owner' => '/api/users/'.$authenticatedUser->getUuid()],
         ]);
         $this->assertResponseIsSuccessful();
     }
@@ -54,7 +54,7 @@ class CheeseListingResourceTest extends ApiTestCase
         $this->logIn($client, $user2);
         $client->request('PUT', '/api/cheeses/'.$cheeseListing->getId(), [
             // try to trick security by reassigning to this user
-            'json' => ['title' => 'Updated', 'owner' => '/api/users/'.$user2->getId()],
+            'json' => ['title' => 'Updated', 'owner' => '/api/users/'.$user2->getUuid()],
         ]);
         $this->assertResponseStatusCodeSame(403, 'only author can update');
 
@@ -168,7 +168,7 @@ class CheeseListingResourceTest extends ApiTestCase
                 'title' => 'cheese2',
                 'description' => 'cheese',
                 'price' => 1000,
-                'owner' => '/api/users/' . $user->getId(),
+                'owner' => '/api/users/' . $user->getUuid(),
                 'shortDescription' => 'cheese',
                 'createdAtAgo' => '1 second ago',
             ]
@@ -187,7 +187,7 @@ class CheeseListingResourceTest extends ApiTestCase
         $client->request('GET', '/api/cheeses/'.$cheeseListing1->getId());
         $this->assertResponseStatusCodeSame(404);
 
-        $response = $client->request('GET', '/api/users/'.$otherUser->getId());
+        $response = $client->request('GET', '/api/users/'.$otherUser->getUuid());
         $data = $response->toArray();
         $this->assertEmpty($data['cheeseListings']);
     }
