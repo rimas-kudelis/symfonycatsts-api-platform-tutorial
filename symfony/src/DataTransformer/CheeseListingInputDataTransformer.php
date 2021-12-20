@@ -6,6 +6,7 @@ namespace App\DataTransformer;
 
 use ApiPlatform\Core\DataTransformer\DataTransformerInterface;
 use ApiPlatform\Core\Exception\InvalidArgumentException;
+use ApiPlatform\Core\Serializer\AbstractItemNormalizer;
 use App\Dto\CheeseListingInput;
 use App\Entity\CheeseListing;
 
@@ -21,7 +22,12 @@ class CheeseListingInputDataTransformer implements DataTransformerInterface
             ));
         }
 
-        $cheeseListing = new CheeseListing($input->title);
+        if (isset($context[AbstractItemNormalizer::OBJECT_TO_POPULATE])) {
+            $cheeseListing = $context[AbstractItemNormalizer::OBJECT_TO_POPULATE];
+        } else {
+            $cheeseListing = new CheeseListing($input->title);
+        }
+
         $cheeseListing->setDescription($input->description);
         $cheeseListing->setPrice($input->price);
         $cheeseListing->setOwner($input->owner);
