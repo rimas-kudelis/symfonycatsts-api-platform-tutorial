@@ -74,7 +74,7 @@ class CheeseListing
      * Title of the listing.
      */
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(["cheese:read", "cheese:write", "user:read", "user:write"])]
+    #[Groups(["cheese:write", "user:write"])]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 50, maxMessage: "The title should be 50 characters or less")]
     private ?string $title;
@@ -83,7 +83,6 @@ class CheeseListing
      * HTML-formatted description of this listing.
      */
     #[ORM\Column(type: 'text')]
-    #[Groups(["cheese:read"])]
     #[Assert\NotBlank]
     private string $description;
 
@@ -91,7 +90,7 @@ class CheeseListing
      * Price of the cheese in cents.
      */
     #[ORM\Column(type: 'integer')]
-    #[Groups(["cheese:read", "cheese:write", "user:read", "user:write"])]
+    #[Groups(["cheese:write", "user:write"])]
     #[Assert\NotBlank]
     #[Assert\GreaterThan(value: 0)]
     private int $price;
@@ -105,7 +104,7 @@ class CheeseListing
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'cheeseListings')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["cheese:read", "cheese:collection:post"])]
+    #[Groups(["cheese:collection:post"])]
     #[AppAssert\IsValidOwner]
     private ?User $owner = null;
 
@@ -140,7 +139,6 @@ class CheeseListing
     /**
      * Shortened text of the description.
      */
-    #[Groups(["cheese:read"])]
     public function getShortDescription(): ?string
     {
         if (40 > strlen($this->getDescription())) {
@@ -184,15 +182,6 @@ class CheeseListing
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
-    }
-
-    /**
-     * Time since this listing has been added.
-     */
-    #[Groups(["cheese:read"])]
-    public function getCreatedAtAgo(): string
-    {
-        return Carbon::instance($this->getCreatedAt())->diffForHumans();
     }
 
     public function setCreatedAt(\DateTimeImmutable $createdAt): self
