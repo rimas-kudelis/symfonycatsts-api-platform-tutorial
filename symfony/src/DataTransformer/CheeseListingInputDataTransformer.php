@@ -22,6 +22,7 @@ class CheeseListingInputDataTransformer implements DataTransformerInterface
 
     public function transform($input, string $to, array $context = [])
     {
+        dump('Transforming cheeseListing input.', ['input' => $input, 'to' => $to, 'context' => $context]);
         if (!$input instanceof CheeseListingInput) {
             throw new InvalidArgumentException(sprintf(
                 'The object to transform must be an instance of %s, but got %s.',
@@ -39,6 +40,11 @@ class CheeseListingInputDataTransformer implements DataTransformerInterface
 
     public function supportsTransformation($data, string $to, array $context = []): bool
     {
+        dump(sprintf(
+            'checking if cheese listing transformation is supported., will return %s.',
+            ($to === CheeseListing::class && CheeseListingInput::class === ($context['input']['class'] ?? null)) ? 'true' : 'false',
+        ), ['data' => $data, 'to' => $to, 'context' => $context]);
+
         if ($data instanceof CheeseListing) {
             // Already transformed
             return false;

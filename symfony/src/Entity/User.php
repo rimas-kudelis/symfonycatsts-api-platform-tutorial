@@ -79,6 +79,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank]
     private string $username;
 
+    #[ApiProperty(writableLink: true)]
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: CheeseListing::class, cascade: ['persist'], orphanRemoval: true)]
     #[Groups(["user:write" ])]
     #[Assert\Valid]
